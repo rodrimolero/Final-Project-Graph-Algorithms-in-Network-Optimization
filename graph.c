@@ -1,9 +1,19 @@
 #include <stdio.h>
 
-#define V 15 // Number of bus stops
+// Number of bus stops
+#define V 16
 
-int graph[V][V]; // Adjacency matrix to represent the graph
+// Adjacency matrix to represent the graph
+int graph[V][V];
 
+// Array of bus stop names for reference
+char *stops[V] = {
+    "Downtown","University","Airport","Mall","Hospital","Stadium",
+    "Library","Police","Museum","Bank",
+    "Post Office","Beach","Port","School","Market","Park"
+};
+
+// Function to initialize the graph with no edges
 void initGraph() {
     for (int i = 0; i < V; i++) {
         for (int j = 0; j < V; j++) {
@@ -12,29 +22,77 @@ void initGraph() {
     }
 }
 
+// Function to add an edge between two bus stops with a given weight (travel time)
 void addEdge(int u, int v, int weight) {
     graph[u][v] = weight; // Add edge from u to v with given weight
     graph[v][u] = weight; // Add edge from v to u (undirected graph)
 }
 
-void createSample() {
-    addEdge(0, 1, 5); // Stop A -> B (5 minutes)
-    addEdge(0, 2, 10);
-    addEdge(1, 3, 15);
-    addEdge(2, 3, 20);
-    addEdge(3, 4, 25);
-    addEdge(4, 5, 30);
+// Function to create a bus network with specific connections and travel times
+void createBusNetwork() {
+    // Core city connections
+    addEdge(0, 1, 5); // Downtown -> University (5 minutes)
+    addEdge(0, 2, 12); // Downtown -> Airport (12 minutes)
+    addEdge(0, 4, 8); // Downtown -> Hospital (8 minutes)
+    addEdge(0, 7, 6); // Downtown -> Police Station (6 minutes)
+
+    // University connections
+    addEdge(1, 3, 10); // University -> Mall (10 minutes)
+    addEdge(1, 5, 15); // University -> Stadium (15 minutes)
+    addEdge(1, 6, 7); // University -> Library (7 minutes)
+
+    // Airport connections
+    addEdge(2, 8, 20); // Airport -> Museum (20 minutes)
+    addEdge(2, 9, 18); // Airport -> Bank (18 minutes)
+
+    // Mall connections
+    addEdge(3, 10, 5); // Mall -> Post Office (5 minutes)
+    addEdge(3, 11, 17); // Mall -> Beach (17 minutes)
+
+    // Hospital connections
+    addEdge(4, 7, 10); // Hospital -> Police Station (10 minutes)
+    addEdge(4, 13, 12); // Hospital -> School (12 minutes)
+
+    // Stadium connections
+    addEdge(5, 12, 25); // Stadium -> Port (25 minutes)
+    addEdge(5, 14, 10); // Stadium -> Market (10 minutes)
+
+    // Library connections
+    addEdge(6, 15, 8); // Library -> Park (8 minutes)
+
+    // Police Station connections
+    addEdge(7, 8, 9); // Police Station -> Museum (9 minutes)
+    addEdge(7, 9, 11); // Police Station -> Bank (11 minutes)
+
+    // School connections   
+    addEdge(13, 14, 6); // School -> Market (6 minutes)
+    addEdge(13, 15, 8); // School -> Park (8 minutes)
 }
 
-void createSample2() {
-    addEdge(0, 3, 5);
-    addEdge(0, 5, 10);
-    addEdge(1, 2, 15);
-    addEdge(2, 3, 20);
-    addEdge(3, 6, 25);
-    addEdge(4, 1, 30);
+// Function to print the adjacency matrix of the graph
+void printGraph() {
+    printf("Graph adjacency matrix (travel times in minutes):\n");
+    for (int i = 0; i < V; i++) {
+        printf("%-11s", stops[i]);
+    }
+    printf("\n");
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; j++) {
+            printf("%-11d", graph[i][j]);
+        }
+        printf("\n");
+    }
 }
 
+// Function to print the list of bus stops
+void printStops() {
+    printf("\nBus Stops:\n");
+    for (int i = 0; i < V; i++) {
+        printf("%d -> %s\n", i, stops[i]);
+    }
+}
+
+// Function to perform Breadth-First Search (BFS) on the graph starting from a given node
 void BFS(int graph[V][V], int start) {
     int queue[V], front = 0, rear = 0; // Front is the index of the next item to be removed, rear is the index where the new item will be added
     int visited[V] = {0}; // Track visited nodes
@@ -53,6 +111,7 @@ void BFS(int graph[V][V], int start) {
     }
 }
 
+// Function to perform Depth-First Search (DFS) on the graph starting from a given node
 void DFS(int graph[V][V], int visited[V], int curr) {
     visited[curr] = 1; // Mark the current node as visited
     printf("Visited node: %d\n", curr); // Process the current node
@@ -65,8 +124,9 @@ void DFS(int graph[V][V], int visited[V], int curr) {
 
 int main() {
     initGraph(); // Initialize the graph
-    createSample(); // Create a sample graph with bus stops and travel times
-    printf("Graph initialized and sample created.\n");
+    createBusNetwork(); // Create the bus network with specific connections and travel times
+    printGraph(); // Print the adjacency matrix of the graph
+    printStops(); // Print the list of bus stops
 
     printf("-------------------------------------\n");
     printf("BFS Traversal: \n");
