@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <windows.h>
 
 // Number of bus stops
 #define V 16
@@ -144,82 +145,99 @@ void DFS(int graph[V][V], int visited[V], int curr) {
     }
 }
 
+int minMSTEdge(int smallestEdges[V], int isinMST[V]) {
+    int minWeight = 9999999;
+    int minIndex = -1;
+    for (int i = 0; i < V; i++) {
+        // If the node has not been visited before and it has a smaller edge weight than any other edge
+        if (!isinMST[i] && smallestEdges[i] < minWeight) {
+            minWeight = smallestEdges[i]; // Then set it to be the new smallest edge
+            minIndex = i; // And the new smallest index
+        }
+    }
+    return minIndex; // Return the index to be used as the new current node
+}
+
+void MST(int graph[V][V], int start) {
+    int smallestEdges[V];
+    int isinMST[V];
+
+    for (int i = 0; i < V; i++){
+        smallestEdges[i] = 9999999; // Initialize smallest edge for each node to be a very big number
+        isinMST[i] = 0; // Initialize each node to not be in the MST
+    }
+    
+    smallestEdges[start] = 0; // To go from node 0 to node 0 will cost nothing
+
+    for (int i = 0; i < V - 1; i++) {
+        int curr = minMSTEdge(smallestEdges, isinMST); // Current node will be the smallest one in the MST
+
+        // If no smallest edge is found but there are still nodes in the graph then those nodes are disconnected from the network of the starting node.
+        if (curr == -1) {
+            printf("ERROR: graph may be disconnected\n");
+            break;
+        }
+
+        isinMST[curr] = 1; // Make sure the current node is in the MST
+        
+        printf("Visited Node: %d\n", curr); // Output that we have visited the current node
+
+        // For all nodes in the graph
+        for (int neighbor = 0; neighbor < V; neighbor++) {
+            // If the node is a neighbor, that has not been visited, and has a smaller edge weight than any other edge
+            if (graph[curr][neighbor] && !isinMST[neighbor] && graph[curr][neighbor] < smallestEdges[neighbor]) {
+                smallestEdges[neighbor] = graph[curr][neighbor]; // Then set this neighbor to be the new smallest edge
+
+                //printf("Index: %d\t Weight %d\n", neighbor, graph[curr][neighbor]); // Code for explination of MST
+            }
+        }
+    }
+}
+
+void DFSContainer(int graph[V][V], int start) {
+    int visitedDFS[V] = {0}; // Track visited nodes for DFS
+    DFS(mainGraph, visitedDFS, 0);
+}
+
+void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[V][V], int), int graph[V][V], int start_node) {
+    LARGE_INTEGER frequency, start, end;
+    
+    printf("%s Traversal of %s graph: \n", funct_name, graph_name);
+    QueryPerformanceCounter(&frequency);
+    QueryPerformanceCounter(&start);
+    funct(graph, start_node);
+    QueryPerformanceCounter(&end);
+    double cpu_time = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
+    printf("%s Time for %s: %.10f seconds\n", funct_name, graph_name, cpu_time);
+    printf("-------------------------------------\n");
+}
+
+void displayGraphs(char graph_name[], int graph[V][V], int has_stops) {
+    initGraph(graph); // Initialize the graph
+    createBusNetwork(graph); // Create the bus network with specific connections and travel times
+    if (has_stops) printStops(); // Print the list of bus stops with their corresponding indices
+    printf("%s graph adjacency matrix (travel times in minutes):\n", graph_name);
+    printGraph(graph); // Print the adjacency matrix
+    printf("-------------------------------------\n");
+}
+
 int main() {
-    initGraph(mainGraph); // Initialize the main graph
-    createBusNetwork(mainGraph); // Create the main bus network with specific connections and travel times
-    printStops(); // Print the list of bus stops with their corresponding indices
-    printf("-------------------------------------\n");
-    printf("Main graph adjacency matrix (travel times in minutes):\n");
-    printGraph(mainGraph); // Print the adjacency matrix of the main graph
-    printf("-------------------------------------\n");
+    displayGraphs("Main", mainGraph, 1);
+    displayGraphs("Small sparse", smallSparseGraph, 0);
+    displayGraphs("Large sparse", largeSparseGraph, 0);
 
-    initGraph(smallSparseGraph); // Initialize the small sparse graph
-    createSmallSparseGraph(smallSparseGraph); // Create the small sparse graph with specific connections and travel times
-    printf("Small sparse graph adjacency matrix (travel times in minutes):\n");
-    printGraph(smallSparseGraph); // Print the adjacency matrix of the small sparse graph
-    printf("-------------------------------------\n");
+    displayFunct("BFS", "main", BFS, mainGraph, 0);
+    displayFunct("BFS", "small sparse", BFS, smallSparseGraph, 0);
+    displayFunct("BFS", "large sparse", BFS, largeSparseGraph, 0);
 
-    initGraph(largeSparseGraph); // Initialize the large sparse graph
-    createLargeSparseGraph(largeSparseGraph); // Create the large sparse graph with specific connections and travel times
-    printf("Large sparse graph adjacency matrix (travel times in minutes):\n");
-    printGraph(largeSparseGraph); // Print the adjacency matrix of the large sparse graph
-    printf("-------------------------------------\n");
+    displayFunct("DFS", "main", DFSContainer, mainGraph, 0);
+    displayFunct("DFS", "small sparse", DFSContainer, smallSparseGraph, 0);
+    displayFunct("DFS", "large sparse", DFSContainer, largeSparseGraph, 0);
 
-    clock_t start, end;
-    double cpu_time;
-
-    printf("-------------------------------------\n");
-    printf("BFS Traversal of main graph: \n");
-    start = clock();
-    BFS(mainGraph, 0); // Perform BFS starting from node 0 (Stop A)
-    end = clock();
-    cpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("BFS Time for main graph: %f seconds\n", cpu_time);
-    printf("-------------------------------------\n");
-
-    printf("BFS Traversal of small sparse graph: \n");
-    start = clock();
-    BFS(smallSparseGraph, 0); // Perform BFS starting from node 0 (Stop A)
-    end = clock();
-    cpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("BFS Time for small sparse graph: %f seconds\n", cpu_time);
-    printf("-------------------------------------\n");
-
-    printf("BFS Traversal of large sparse graph: \n");
-    start = clock();
-    BFS(largeSparseGraph, 0); // Perform BFS starting from node 0 (Stop A)
-    end = clock();
-    cpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("BFS Time for large sparse graph: %f seconds\n", cpu_time);
-    printf("-------------------------------------\n");
-
-    printf("DFS Traversal of main graph: \n");
-    int visitedDFSMainGraph[V] = {0}; // Track visited nodes for DFS
-    start = clock();
-    DFS(mainGraph, visitedDFSMainGraph, 0); // Perform DFS starting from node 0 (Stop A)
-    end = clock();
-    cpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("DFS Time for main graph: %f seconds\n", cpu_time);
-    printf("-------------------------------------\n");
-
-    printf("DFS Traversal of small sparse graph: \n");
-    int visitedDFSSmallSparseGraph[V] = {0}; // Track visited nodes for DFS
-    start = clock();
-    DFS(smallSparseGraph, visitedDFSSmallSparseGraph, 0); // Perform DFS starting from node 0 (Stop A)
-    end = clock();
-    cpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("DFS Time for small sparse graph: %f seconds\n", cpu_time);
-    printf("-------------------------------------\n");
-
-    printf("DFS Traversal of large sparse graph: \n");
-    int visitedDFSLargeSparseGraph[V] = {0}; // Track visited nodes for DFS
-    start = clock();
-    DFS(largeSparseGraph, visitedDFSLargeSparseGraph, 0); // Perform DFS starting from node 0 (Stop A)
-    end = clock();
-    cpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("DFS Time for large sparse graph: %f seconds\n", cpu_time);
-    printf("-------------------------------------\n");
-
+    displayFunct("MST", "main graph", MST, mainGraph, 0);
+    displayFunct("MST", "small sparse", MST, smallSparseGraph, 0);
+    displayFunct("MST", "large sparse", MST, largeSparseGraph, 0);
+    
 
     return 0;
 }
