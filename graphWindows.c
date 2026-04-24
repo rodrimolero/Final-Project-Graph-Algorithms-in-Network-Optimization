@@ -197,10 +197,9 @@ void DFSContainer(int graph[V][V], int start) {
     DFS(graph, visitedDFS, 0); // Call DFS with the provided graph, visited array, and starting node
 }
 
-/*
-Bellman-Ford algorithm using the bus network adjacency matrix.
-Finds shortest travel times from a source stop to all other stops.
-*/
+
+//Bellman-Ford algorithm using the bus network adjacency matrix.
+//Finds shortest travel times from a source stop to all other stops.
 void bellmanFord(int graph[V][V], int source) 
 {
     int distance[V];
