@@ -163,35 +163,55 @@ int minMSTEdge(int smallestEdges[V], int isinMST[V]) {
 void MST(int graph[V][V], int start) {
     int smallestEdges[V];
     int isinMST[V];
+    int parent[V];
 
-    for (int i = 0; i < V; i++){
-        smallestEdges[i] = 9999999; // Initialize smallest edge for each node to be a very big number
-        isinMST[i] = 0; // Initialize each node to not be in the MST
+    // Initialize arrays
+    for (int i = 0; i < V; i++) {
+        smallestEdges[i] = 9999999;
+        isinMST[i] = 0;
+        parent[i] = -1;
     }
-    
-    smallestEdges[start] = 0; // To go from node 0 to node 0 will cost nothing
 
-    for (int i = 0; i < V - 1; i++) {
-        int curr = minMSTEdge(smallestEdges, isinMST); // Current node will be the smallest one in the MST
+    smallestEdges[start] = 0;
 
-        // If no smallest edge is found but there are still nodes in the graph then those nodes are disconnected from the network of the starting node.
+    // Build MST
+    for (int i = 0; i < V; i++) {
+        int curr = minMSTEdge(smallestEdges, isinMST);
+
         if (curr == -1) {
-            printf("ERROR: graph may be disconnected\n");
+            printf("MST complete (graph may be disconnected)\n");
             break;
         }
 
-        isinMST[curr] = 1; // Make sure the current node is in the MST
-        
-        printf("Visited Node: %d\n", curr); // Output that we have visited the current node
+        isinMST[curr] = 1;
 
-        // For all nodes in the graph
+        // Update neighbors
         for (int neighbor = 0; neighbor < V; neighbor++) {
-            // If the node is a neighbor, that has not been visited, and has a smaller edge weight than any other edge
-            if (graph[curr][neighbor] && !isinMST[neighbor] && graph[curr][neighbor] < smallestEdges[neighbor]) {
-                smallestEdges[neighbor] = graph[curr][neighbor]; // Then set this neighbor to be the new smallest edge
+            if (graph[curr][neighbor] &&
+                !isinMST[neighbor] &&
+                graph[curr][neighbor] < smallestEdges[neighbor]) {
+
+                smallestEdges[neighbor] = graph[curr][neighbor];
+                parent[neighbor] = curr; // Track MST edge
             }
         }
     }
+
+    // Print MST edges
+    printf("\nEdge \t\t\tWeight\n");
+    int totalCost = 0;
+
+    for (int i = 0; i < V; i++) {
+        if (parent[i] != -1) {
+            printf("%-10s - %-10s %5d\n",
+                   stops[parent[i]],
+                   stops[i],
+                   graph[i][parent[i]]);
+            totalCost += graph[i][parent[i]];
+        }
+    }
+
+    printf("Total cost of MST: %d\n", totalCost);
 }
 
 // Wrapper function for DFS to handle the visited array and call the recursive DFS function
