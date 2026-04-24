@@ -145,6 +145,7 @@ void DFS(int graph[V][V], int visited[V], int curr) {
     }
 }
 
+// Helper function to find the index of the smallest edge weight that is not yet included in the MST
 int minMSTEdge(int smallestEdges[V], int isinMST[V]) {
     int minWeight = 9999999;
     int minIndex = -1;
@@ -158,6 +159,7 @@ int minMSTEdge(int smallestEdges[V], int isinMST[V]) {
     return minIndex; // Return the index to be used as the new current node
 }
 
+// Function to perform Prim's algorithm to find the Minimum Spanning Tree (MST) of the graph starting from a given node
 void MST(int graph[V][V], int start) {
     int smallestEdges[V];
     int isinMST[V];
@@ -192,6 +194,7 @@ void MST(int graph[V][V], int start) {
     }
 }
 
+// Wrapper function for DFS to handle the visited array and call the recursive DFS function
 void DFSContainer(int graph[V][V], int start) {
     int visitedDFS[V] = {0}; // Track visited nodes for DFS
     DFS(graph, visitedDFS, 0); // Call DFS with the provided graph, visited array, and starting node
@@ -269,80 +272,7 @@ void bellmanFord(int graph[V][V], int source)
     }
 }
 
-
-/*
-Bellman-Ford algorithm using the bus network adjacency matrix.
-Finds shortest travel times from a source stop to all other stops.
-*/
-void bellmanFord(int graph[V][V], int source) 
-{
-    int distance[V];
-    int predecessor[V];
-    //Initialize distances to 9999999, predecessors to -1
-    for (int i = 0; i < V; i++) {    
-        distance[i] = 9999999;
-        predecessor[i] = -1;
-    }
-    distance[source] = 0;
- 
-    //Relax all edges V-1 times.
-    for (int i = 0; i < V - 1; i++) {
-        for (int u = 0; u < V; u++) {
-            for (int v = 0; v < V; v++) {
-                if (graph[u][v] != 0 && distance[u] != 9999999 && distance[u] + graph[u][v] < distance[v]) //If 
-                {
-                    distance[v] = distance[u] + graph[u][v];
-                    predecessor[v] = u;
-                }
-            }
-        }
-    }
- 
-    //Check for negative-weight cycles
-    for (int u = 0; u < V; u++) {
-        for (int v = 0; v < V; v++) 
-        {
-            if (graph[u][v] != 0 && distance[u] != 9999999
-                && distance[u] + graph[u][v] < distance[v]) 
-            {
-                printf("Negative cycle detected!\n");
-                return;
-            }
-        }
-    }
- 
-    //Print shortest travel times from the source stop
-    printf("\nShortest travel times from %s:\n", stops[source]);
-    printf("%-15s %-10s %s\n", "Stop", "Time", "Path");
-    printf("----------------------------------------------\n");
- 
-    for (int i = 0; i < V; i++) 
-    {
-        printf("%-15s ", stops[i]);
-        if (distance[i] == 9999999) 
-        {
-            printf("No route\n");
-        } 
-        else 
-        {
-            printf("%-10d ", distance[i]);
-            //Print the path
-            int path[V];
-            int pathLen = 0;
-            int current = i;
-            while (current != -1) {
-                path[pathLen++] = current;
-                current = predecessor[current];
-            }
-            for (int p = pathLen - 1; p >= 0; p--) {
-                printf("%s", stops[path[p]]);
-                if (p > 0) printf(" -> ");
-            }
-            printf("\n");
-        }
-    }
-}
-
+// Function to display the results of a graph algorithm and measure its execution time
 void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[V][V], int), int graph[V][V], int start_node) {
     LARGE_INTEGER frequency, start, end;
     
@@ -355,7 +285,7 @@ void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[
     printf("%s Time for %s: %.10f seconds\n", funct_name, graph_name, cpu_time);
     printf("-------------------------------------\n");
 }
-//Added function pointer createFn to properly build each graph.
+// Function to display the graph and its properties, including the adjacency matrix and bus stops
 void displayGraphs(char graph_name[], int graph[V][V], int has_stops, void (*createFn)(int g[V][V])) {
     initGraph(graph); // Initialize the graph
     createBusNetwork(graph); // Create the bus network with specific connections and travel times

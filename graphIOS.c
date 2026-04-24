@@ -144,6 +144,7 @@ void DFS(int graph[V][V], int visited[V], int curr) {
     }
 }
 
+// Helper function to find the index of the smallest edge weight that is not yet included in the MST
 int minMSTEdge(int smallestEdges[V], int isinMST[V]) {
     int minWeight = 9999999;
     int minIndex = -1;
@@ -157,6 +158,7 @@ int minMSTEdge(int smallestEdges[V], int isinMST[V]) {
     return minIndex; // Return the index to be used as the new current node
 }
 
+// Function to perform Prim's algorithm to find the Minimum Spanning Tree (MST) of the graph starting from a given node
 void MST(int graph[V][V], int start) {
     int smallestEdges[V];
     int isinMST[V];
@@ -191,15 +193,15 @@ void MST(int graph[V][V], int start) {
     }
 }
 
+// Wrapper function for DFS to handle the visited array and call the recursive DFS function
 void DFSContainer(int graph[V][V], int start) {
     int visitedDFS[V] = {0}; // Track visited nodes for DFS
     DFS(graph, visitedDFS, start); // Call DFS with the provided graph, visited array, and starting node
 }
 
-/*
-Bellman-Ford algorithm using the bus network adjacency matrix.
-Finds shortest travel times from a source stop to all other stops.
-*/
+
+//Bellman-Ford algorithm using the bus network adjacency matrix.
+//Finds shortest travel times from a source stop to all other stops.
 void bellmanFord(int graph[V][V], int source) 
 {
     int distance[V];
@@ -269,6 +271,7 @@ void bellmanFord(int graph[V][V], int source)
     }
 }
 
+// Function to display the results of a graph algorithm and measure its execution time
 void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[V][V], int), int graph[V][V], int start_node) {    
     printf("%s Traversal of %s graph: \n", funct_name, graph_name);
     clock_t start = clock();
@@ -279,6 +282,7 @@ void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[
     printf("-------------------------------------\n");
 }
 
+// Function to display the graph and its properties, including the adjacency matrix and bus stops
 void displayGraphs(char graph_name[], int graph[V][V], int has_stops) {
     initGraph(graph); // Initialize the graph
     if (graph == mainGraph) {
