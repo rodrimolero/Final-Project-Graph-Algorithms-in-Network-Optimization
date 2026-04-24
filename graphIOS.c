@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <time.h>
-#include <windows.h>
 
 // Number of bus stops
 #define V 16
@@ -169,12 +168,12 @@ void MST(int graph[V][V], int start) {
     
     smallestEdges[start] = 0; // To go from node 0 to node 0 will cost nothing
 
-    for (int i = 0; i < V - 1; i++) {
+    for (int i = 0; i < V; i++) {
         int curr = minMSTEdge(smallestEdges, isinMST); // Current node will be the smallest one in the MST
 
         // If no smallest edge is found but there are still nodes in the graph then those nodes are disconnected from the network of the starting node.
         if (curr == -1) {
-            printf("ERROR: graph may be disconnected\n");
+            printf("MST complete (graph may be disconnected)\n");
             break;
         }
 
@@ -194,7 +193,7 @@ void MST(int graph[V][V], int start) {
 
 void DFSContainer(int graph[V][V], int start) {
     int visitedDFS[V] = {0}; // Track visited nodes for DFS
-    DFS(graph, visitedDFS, 0); // Call DFS with the provided graph, visited array, and starting node
+    DFS(graph, visitedDFS, start); // Call DFS with the provided graph, visited array, and starting node
 }
 
 /*
@@ -270,15 +269,12 @@ void bellmanFord(int graph[V][V], int source)
     }
 }
 
-void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[V][V], int), int graph[V][V], int start_node) {
-    LARGE_INTEGER frequency, start, end;
-    
+void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[V][V], int), int graph[V][V], int start_node) {    
     printf("%s Traversal of %s graph: \n", funct_name, graph_name);
-    QueryPerformanceCounter(&frequency);
-    QueryPerformanceCounter(&start);
+    clock_t start = clock();
     funct(graph, start_node);
-    QueryPerformanceCounter(&end);
-    double cpu_time = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
+    clock_t end = clock();
+    double cpu_time = ((double)(end - start)) / CLOCKS_PER_SEC;
     printf("%s Time for %s: %.10f seconds\n", funct_name, graph_name, cpu_time);
     printf("-------------------------------------\n");
 }
