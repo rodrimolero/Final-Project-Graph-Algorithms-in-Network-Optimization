@@ -270,6 +270,80 @@ void bellmanFord(int graph[V][V], int source)
     }
 }
 
+
+/*
+Bellman-Ford algorithm using the bus network adjacency matrix.
+Finds shortest travel times from a source stop to all other stops.
+*/
+void bellmanFord(int graph[V][V], int source) 
+{
+    int distance[V];
+    int predecessor[V];
+    //Initialize distances to 9999999, predecessors to -1
+    for (int i = 0; i < V; i++) {    
+        distance[i] = 9999999;
+        predecessor[i] = -1;
+    }
+    distance[source] = 0;
+ 
+    //Relax all edges V-1 times.
+    for (int i = 0; i < V - 1; i++) {
+        for (int u = 0; u < V; u++) {
+            for (int v = 0; v < V; v++) {
+                if (graph[u][v] != 0 && distance[u] != 9999999 && distance[u] + graph[u][v] < distance[v]) //If 
+                {
+                    distance[v] = distance[u] + graph[u][v];
+                    predecessor[v] = u;
+                }
+            }
+        }
+    }
+ 
+    //Check for negative-weight cycles
+    for (int u = 0; u < V; u++) {
+        for (int v = 0; v < V; v++) 
+        {
+            if (graph[u][v] != 0 && distance[u] != 9999999
+                && distance[u] + graph[u][v] < distance[v]) 
+            {
+                printf("Negative cycle detected!\n");
+                return;
+            }
+        }
+    }
+ 
+    //Print shortest travel times from the source stop
+    printf("\nShortest travel times from %s:\n", stops[source]);
+    printf("%-15s %-10s %s\n", "Stop", "Time", "Path");
+    printf("----------------------------------------------\n");
+ 
+    for (int i = 0; i < V; i++) 
+    {
+        printf("%-15s ", stops[i]);
+        if (distance[i] == 9999999) 
+        {
+            printf("No route\n");
+        } 
+        else 
+        {
+            printf("%-10d ", distance[i]);
+            //Print the path
+            int path[V];
+            int pathLen = 0;
+            int current = i;
+            while (current != -1) {
+                path[pathLen++] = current;
+                current = predecessor[current];
+            }
+            for (int p = pathLen - 1; p >= 0; p--) {
+                printf("%s", stops[path[p]]);
+                if (p > 0) printf(" -> ");
+            }
+            printf("\n");
+        }
+    }
+}
+
 void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[V][V], int), int graph[V][V], int start_node) {
     LARGE_INTEGER frequency, start, end;
     
@@ -282,28 +356,20 @@ void displayFunct(char funct_name[], char graph_name[], void (*funct)(int graph[
     printf("%s Time for %s: %.10f seconds\n", funct_name, graph_name, cpu_time);
     printf("-------------------------------------\n");
 }
-
-void displayGraphs(char graph_name[], int graph[V][V], int has_stops) {
+//Added function pointer createFn to properly build each graph.
+void displayGraphs(char graph_name[], int graph[V][V], int has_stops, void (*createFn)(int g[V][V])) {
     initGraph(graph); // Initialize the graph
-    if (graph == mainGraph) {
-        createBusNetwork(graph); // Create the bus network with specific connections and travel times
-    } else if (graph == smallSparseGraph) {
-        createSmallSparseGraph(graph); // Create the small sparse graph with specific connections and travel times
-    } else if (graph == largeSparseGraph) {
-        createLargeSparseGraph(graph); // Create the large sparse graph with specific connections and travel times
-    }
-    if (has_stops) {
-        printStops(); // Print the list of bus stops with their corresponding indices
-    }
+    createBusNetwork(graph); // Create the bus network with specific connections and travel times
+    if (has_stops) printStops(); // Print the list of bus stops with their corresponding indices
     printf("%s graph adjacency matrix (travel times in minutes):\n", graph_name);
     printGraph(graph); // Print the adjacency matrix
     printf("-------------------------------------\n");
 }
 
 int main() {
-    displayGraphs("Main", mainGraph, 1);
-    displayGraphs("Small sparse", smallSparseGraph, 0);
-    displayGraphs("Large sparse", largeSparseGraph, 0);
+    displayGraphs("Main", mainGraph, 1, createBusNetwork); //Function arg added.
+    displayGraphs("Small sparse", smallSparseGraph, 0, createSmallSparseGraph); //Function arg added.
+    displayGraphs("Large sparse", largeSparseGraph, 0, createLargeSparseGraph); //Function arg added.
 
     displayFunct("BFS", "main", BFS, mainGraph, 0);
     displayFunct("BFS", "small sparse", BFS, smallSparseGraph, 0);
@@ -317,9 +383,6 @@ int main() {
     displayFunct("MST", "small sparse", MST, smallSparseGraph, 0);
     displayFunct("MST", "large sparse", MST, largeSparseGraph, 0);
     
-    displayFunct("Bellman-Ford", "main graph", bellmanFord, mainGraph,0);
-    displayFunct("Bellman-Ford", "small sparse", bellmanFord, smallSparseGraph,0);
-    displayFunct("Bellman-Ford", "large sparse", bellmanFord, largeSparseGraph,0);
 
     return 0;
 }
